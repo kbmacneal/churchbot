@@ -1,0 +1,3 @@
+This bot is currently not being developed. It is built on top of .net 4.7.1 and is intended to be hosted as a web job on top of Azure. The methods in the other bot should work just fine if copy and pasted into here, but the other files are not compatible.
+
+Note that if you were to try and host this in Azure, you would need to host it on top of a Basic or better web app instance, as the bot needs to run continuously and that tier is the start of the tiers that would allow you to do that.

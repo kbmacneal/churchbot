@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace churchbot
 {
@@ -18,7 +19,7 @@ namespace churchbot
         private DiscordSocketClient _client;
         private CommandService _commands;
         private IServiceProvider _services;
-        public static readonly string[] prefixes = { "cr!", "fr!", "vl!", "aq!", "er!", "ly!", "py!", "rt!", "sr!", "tr!", "ac!", "pr!", "dt!", "cb!", "rp!", "14!", "upc!", "vg!" };
+        public static readonly string[] prefixes = { "cr!", "fr!", "vl!", "aq!", "er!", "ly!", "py!", "rt!", "sr!", "tr!", "ac!", "pr!", "dt!", "cb!", "rp!", "14!", "up!", "vg!" };
 
         public async Task RunBotAsync(string botToken)
         {
@@ -77,6 +78,8 @@ namespace churchbot
 
                 string command = fullcommand.Replace(msg_prefix, "");
 
+                string prefix = fullcommand.ToString().Substring(0, 3);
+
                 SocketGuildUser user = (message.Author as SocketGuildUser);
 
                 bool isAuthorized = CheckAuthorization(user, msg_prefix);
@@ -103,15 +106,27 @@ namespace churchbot
                 {
                     churchbot.voting.voting vt = new churchbot.voting.voting();
                     List<int> ids = new List<int>();
-
-                    string[] files = System.IO.Directory.GetFiles("votes");
+                    string path = String.Concat("votes\\" + prefix.Replace("!", ""));
+                    //string dir = Directory.GetDirectories("votes").Where(s => s.Contains(prefix.Replace("!", ""))).ToString();
+                    string[] files = System.IO.Directory.GetFiles(path);
+                    int id = 0;
 
                     foreach (string file in files)
                     {
-                        ids.Add(Convert.ToInt32(file.Split("/votes/")[1].Replace(".json", "")));
+                        ids.Add(Convert.ToInt32(file.Replace(path + "\\","").Replace(".json", "")));
+                    }
+                    //votes\1.json
+
+                    if(ids.Count == 0)
+                    {
+                        id = 1;
+                    }
+                    else
+                    {
+                        id = ids.Max() + 1;
                     }
 
-                    int id = ids.Max() + 1;
+                    
 
                     List<string> returns = await vt.AddQuestion(id, msg_prefix);
 
@@ -212,7 +227,7 @@ namespace churchbot
                 case "14!":
                     isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
                     break;
-                case "upc!":
+                case "up!":
                     isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
                     break;
                 case "vg!":

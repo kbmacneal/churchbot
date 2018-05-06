@@ -296,7 +296,14 @@ namespace churchbot.voting
 
         private string GetGuildDir(string prefix)
         {
-            prefix = "votes" + prefix.Replace("!", "");
+            //make sure that the directory exists
+
+            if(!(System.IO.Directory.Exists("votes\\" + prefix.Replace("!", ""))))
+            {
+                System.IO.Directory.CreateDirectory("votes\\" + prefix.Replace("!", ""));
+            }
+
+            prefix = "votes\\" + prefix.Replace("!", "") + "\\";
 
 
             return prefix;

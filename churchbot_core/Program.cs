@@ -9,103 +9,233 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-namespace churchbot {
-    internal class Program {
-        private static void Main (string[] args) => new Program ().RunBotAsync (args[0]).GetAwaiter ().GetResult ();
+namespace churchbot
+{
+    internal class Program
+    {
+        private static void Main(string[] args) => new Program().RunBotAsync(args[0]).GetAwaiter().GetResult();
 
         private DiscordSocketClient _client;
         private CommandService _commands;
         private IServiceProvider _services;
+        public static readonly string[] prefixes = { "cr!", "fr!", "vl!", "aq!", "er!", "ly!", "py!", "rt!", "sr!", "tr!", "ac!", "pr!", "dt!", "cb!", "rp!", "14!", "upc!", "vg!" };
 
-        public async Task RunBotAsync (string botToken) {
+        public async Task RunBotAsync(string botToken)
+        {
             //this directory has to exist
-            if (!(System.IO.Directory.Exists ("votes"))) System.IO.Directory.CreateDirectory ("votes");
+            if (!(System.IO.Directory.Exists("votes"))) System.IO.Directory.CreateDirectory("votes");
 
-            _client = new DiscordSocketClient ();
-            _commands = new CommandService ();
-            _services = new ServiceCollection ().AddSingleton (_client).AddSingleton (_commands).BuildServiceProvider ();
+            _client = new DiscordSocketClient();
+            _commands = new CommandService();
+            _services = new ServiceCollection().AddSingleton(_client).AddSingleton(_commands).BuildServiceProvider();
 
             //event subscriptions
             _client.Log += Log;
 
-            await RegisterCommandAsync ();
+            await RegisterCommandAsync();
 
-            await _client.LoginAsync (TokenType.Bot, botToken);
+            await _client.LoginAsync(TokenType.Bot, botToken);
 
-            await _client.StartAsync ();
+            await _client.StartAsync();
 
-            await Task.Delay (-1);
+            await Task.Delay(-1);
         }
 
-        private Task Log (LogMessage arg) {
-            Console.WriteLine (arg);
+        private Task Log(LogMessage arg)
+        {
+            Console.WriteLine(arg);
             return Task.CompletedTask;
         }
 
-        public async Task RegisterCommandAsync () {
+        public async Task RegisterCommandAsync()
+        {
             _client.MessageReceived += HandleCommandAsync;
-            await _commands.AddModulesAsync (Assembly.GetEntryAssembly ());
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-        private async Task HandleCommandAsync (SocketMessage arg) {
+        private async Task HandleCommandAsync(SocketMessage arg)
+        {
             var message = arg as SocketUserMessage;
 
-            if (message is null || message.Author.IsBot) {
+            if (message is null || message.Author.IsBot)
+            {
                 return;
             }
 
             int argPosition = 0;
 
-            if (message.HasStringPrefix ("cb!", ref argPosition) || message.HasMentionPrefix (_client.CurrentUser, ref argPosition)) {
-                var context = new SocketCommandContext (_client, message);
+            if (prefixes.Any(message.Content.ToString().Substring(0, 3).Contains))
+            {
+                string msg_prefix = message.Content.ToString().Substring(0, 3);
+                var context = new SocketCommandContext(_client, message);
 
-                string logmessage = String.Concat (message.Author, " sent command ", message.Content);
-                int test = 0;
-                await Log (new LogMessage (LogSeverity.Info, "VERBOSE", logmessage));
+                string logmessage = String.Concat(message.Author, " sent command ", message.Content);
+
+                await Log(new LogMessage(LogSeverity.Info, "VERBOSE", logmessage));
 
                 string fullcommand = message.Content;
+
+                string command = fullcommand.Replace(msg_prefix, "");
+
                 SocketGuildUser user = (message.Author as SocketGuildUser);
-                bool isChurchUser = false;
-                IRole role = (message.Author as IGuildUser).Guild.Roles.FirstOrDefault (s => s.Name == "church_member");
-                if (user.Roles.Contains (role)) {
-                    isChurchUser = true;
+
+                bool isAuthorized = CheckAuthorization(user, msg_prefix);
+
+                if (!isAuthorized)
+                {
+                    await SendPMAsync("You are not authorized to send messages for this Faction.", message.Author);
+
+                    return;
                 }
 
-                if (fullcommand.ToString ().Contains ("votefor") || fullcommand.ToString ().Contains ("votetally") || fullcommand.ToString ().Contains ("listquestions")) {
-                    if (!isChurchUser) {
-                        await SendPMAsync ("You must be a church member to vote.", message.Author);
-                        return;
+
+                if (fullcommand.ToString().Contains("votefor") || fullcommand.ToString().Contains("votetally") || fullcommand.ToString().Contains("listquestions"))
+                {
+
+                    voting.voting vt = new churchbot.voting.voting();
+                    List<string> returns = await vt.ProcessVote(message, msg_prefix);
+                    foreach (string rtn in returns)
+                    {
+                        await SendPMAsync(rtn, message.Author);
+                    }
+                }
+                else if (fullcommand.ToString().Contains("addquestion"))
+                {
+                    churchbot.voting.voting vt = new churchbot.voting.voting();
+                    List<int> ids = new List<int>();
+
+                    string[] files = System.IO.Directory.GetFiles("votes");
+
+                    foreach (string file in files)
+                    {
+                        ids.Add(Convert.ToInt32(file.Split("/votes/")[1].Replace(".json", "")));
                     }
 
-                    churchbot.voting.voting vt = new churchbot.voting.voting ();
-                    List<string> returns = await vt.ProcessVote (message);
-                    foreach (string rtn in returns) {
-                        await SendPMAsync (rtn, message.Author);
+                    int id = ids.Max() + 1;
+
+                    List<string> returns = await vt.AddQuestion(id, msg_prefix);
+
+                    await SendPMAsync(returns[0], message.Author);
+
+                }
+                else
+                {
+                    //Type thisType = this.GetType();
+                    //MethodInfo theMethod = thisType.GetMethod(TheCommandString);
+                    //theMethod.Invoke(this, userParameters);
+
+
+                    switch (msg_prefix)
+                    {
+                        case "cb!":
+                            Modules.HighChurch.commands cmd = new Modules.HighChurch.commands();
+                            Type type = cmd.GetType();
+                            MethodInfo methodInfo = type.GetMethod(FirstCharToUpper(command) + "Async");
+                            List<object> list = new List<object>();
+                            list.Add(message.Author);
+                            methodInfo.Invoke(cmd, list.ToArray());
+                            break;
+                        default:
+                            await SendPMAsync("There are no commands associated with this faction. Please consult an admin", message.Author);
+                            break;
                     }
-                } else if (fullcommand.ToString ().Contains ("addquestion")) {
-                    churchbot.voting.voting vt = new churchbot.voting.voting ();
-                    if (Int32.TryParse (fullcommand.Split ("addquestion") [1], out test)) {
-                        int id = test;
 
-                        List<string> returns = await vt.AddQuestion (id);
+                    //var result = await _commands.ExecuteAsync(context, argPosition, _services);
 
-                        await SendPMAsync (returns[0], message.Author);
-                    } else {
-                        await SendPMAsync ("Invalid request.", message.Author);
-                    }
-
-                } else {
-                    var result = await _commands.ExecuteAsync (context, argPosition, _services);
-
-                    if (!result.IsSuccess) {
-                        Console.WriteLine (result.ErrorReason);
-                    }
+                    //if (!result.IsSuccess)
+                    //{
+                    //    Console.WriteLine(result.ErrorReason);
+                    //}
                 }
             }
         }
 
-        public async Task SendPMAsync (string message, SocketUser user) {
-            await user.SendMessageAsync (message);
+        public async Task SendPMAsync(string message, SocketUser user)
+        {
+            await user.SendMessageAsync(message);
+        }
+
+        private bool CheckAuthorization(SocketGuildUser user, string prefix)
+        {
+            bool isAuthorized = false;
+
+            switch (prefix)
+            {
+                case "cr!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Crux");
+                    break;
+                case "fr!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Fornax");
+                    break;
+                case "vl!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Vela");
+                    break;
+                case "aq!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Aquila");
+                    break;
+                case "er!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Eridanus");
+                    break;
+                case "ly!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Lyra");
+                    break;
+                case "py!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Pyxis");
+                    break;
+                case "rt!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Reticulum");
+                    break;
+                case "sr!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Serpens");
+                    break;
+                case "tr!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Trilliant Ring");
+                    break;
+                case "ac!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("ACRE");
+                    break;
+                case "pr!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Prism Network");
+                    break;
+                case "dt!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Deathless");
+                    break;
+                case "cb!":
+                    if ((user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The High Chruch of the Messiah-as-Emperor") || (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("church_member"))
+                    {
+                        isAuthorized = true;
+                    }
+                    break;
+                case "rp!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Church of Humanity, Repentant");
+                    break;
+                case "14!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
+                    break;
+                case "upc!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
+                    break;
+                case "vg!":
+                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Vagrant");
+                    break;
+                default:
+
+                    break;
+            }
+
+
+            return isAuthorized;
+        }
+
+        public static string FirstCharToUpper(string s)
+        {
+            // Check for empty string.
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
+            // Return char and concat substring.
+            return char.ToUpper(s[0]) + s.Substring(1);
         }
 
     }

@@ -92,12 +92,14 @@ namespace churchbot.voting
 
     public class voting
     {
-        public async Task<List<string>> ProcessVote(SocketUserMessage message)
+        public async Task<List<string>> ProcessVote(SocketUserMessage message, string prefix)
         {
             string fullcommand = message.Content;
 
             List<string> rtn_messages = new List<string>();
-            //TODO: move over to a switch format.
+
+
+
             if (fullcommand.ToString().Contains("votefor"))
             {
                 //cb!votefor1:1
@@ -137,7 +139,7 @@ namespace churchbot.voting
 
                 vote.user = user;
 
-                rtn_messages.Add(await CastVote(vote, message.Author));
+                rtn_messages.Add(await CastVote(vote, message.Author, prefix));
             }
             else if (fullcommand.ToString().Contains("votetally"))
             {
@@ -146,7 +148,7 @@ namespace churchbot.voting
 
                 if (Int32.TryParse(fullcommand.ToString().Split("votetally")[1], out test))
                 {
-                    List<string> rtns = ReturnTally(test, message.Author).Result;
+                    List<string> rtns = ReturnTally(test, message.Author, prefix).Result;
 
                     foreach (string msg in rtns)
                     {
@@ -160,10 +162,8 @@ namespace churchbot.voting
             }
             else if (fullcommand.ToString().Contains("listquestions"))
             {
-                //cb!votetally1
-                int test = 0;
 
-                List<string> rtns = await ListVotes();
+                List<string> rtns = await ListVotes(prefix);
 
                 foreach (string msg in rtns)
                 {
@@ -178,11 +178,13 @@ namespace churchbot.voting
             return rtn_messages;
         }
 
-        private async Task<string> CastVote(Vote vote, SocketUser user)
+        private async Task<string> CastVote(Vote vote, SocketUser user, string prefix)
         {
-            if (System.IO.File.Exists("votes/" + vote.QuestionID.ToString() + ".json"))
+            string path = GetGuildDir(prefix);
+
+            if (System.IO.File.Exists(path + vote.QuestionID.ToString() + ".json"))
             {
-                string filecontents = System.IO.File.ReadAllText("votes/" + vote.QuestionID.ToString() + ".json");
+                string filecontents = System.IO.File.ReadAllText(path + vote.QuestionID.ToString() + ".json");
 
                 Votes votes = JsonConvert.DeserializeObject<Votes>(filecontents);
 
@@ -194,7 +196,7 @@ namespace churchbot.voting
 
                     string serialized = JsonConvert.SerializeObject(votes);
 
-                    System.IO.File.WriteAllText("votes/" + vote.QuestionID.ToString() + ".json", serialized);
+                    System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
 
                     return (String.Concat(vote.user.UserName, " has successfully cast their vote."));
                 }
@@ -211,7 +213,7 @@ namespace churchbot.voting
                         }
                         string serialized = JsonConvert.SerializeObject(votes);
 
-                        System.IO.File.WriteAllText("votes/" + vote.QuestionID.ToString() + ".json", serialized);
+                        System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
 
                         return (String.Concat(vote.user.UserName, " has successfully changed their vote."));
                     }
@@ -221,7 +223,7 @@ namespace churchbot.voting
 
                         string serialized = JsonConvert.SerializeObject(votes);
 
-                        System.IO.File.WriteAllText("votes/" + vote.QuestionID.ToString() + ".json", serialized);
+                        System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
 
                         return (String.Concat(vote.user.UserName, " has successfully cast their vote."));
                     }
@@ -233,13 +235,15 @@ namespace churchbot.voting
             }
         }
 
-        private async Task<List<string>> ReturnTally(int votenum, SocketUser user)
+        private async Task<List<string>> ReturnTally(int votenum, SocketUser user, string prefix)
         {
             List<string> tallies = new List<string>();
 
-            if (System.IO.File.Exists("votes/" + votenum.ToString() + ".json"))
+            string prepath = GetGuildDir(prefix);
+
+            if (System.IO.File.Exists(prepath + votenum.ToString() + ".json"))
             {
-                string path = string.Concat("votes/" + votenum.ToString() + ".json");
+                string path = string.Concat(prepath + votenum.ToString() + ".json");
 
                 string value = System.IO.File.ReadAllText(path);
 
@@ -265,10 +269,11 @@ namespace churchbot.voting
             return tallies;
         }
 
-        public async Task<List<string>> AddQuestion(int votenum)
+        public async Task<List<string>> AddQuestion(int votenum, string prefix)
         {
             List<string> rtn = new List<string>();
-            string path = string.Concat("votes/", votenum, ".json");
+            string prepath = GetGuildDir(prefix);
+            string path = string.Concat(prepath, votenum, ".json");
             if (!(System.IO.File.Exists(path)))
             {
                 System.IO.File.Create(path);
@@ -282,11 +287,19 @@ namespace churchbot.voting
             return rtn;
         }
 
-        public async Task<List<string>> ListVotes()
+        public async Task<List<string>> ListVotes(string prefix)
         {
-            string path = "votes/";
+            string path = GetGuildDir(prefix);
 
-            return System.IO.Directory.GetFiles(path).Select(s => s.Split("votes")[1].Replace(".json", "")).ToList();
+            return System.IO.Directory.GetFiles(path).Select(s => s.Split("/votes/")[1].Replace(".json", "")).ToList();
+        }
+
+        private string GetGuildDir(string prefix)
+        {
+            prefix = "votes" + prefix.Replace("!", "");
+
+
+            return prefix;
         }
     }
 }

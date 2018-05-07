@@ -253,7 +253,7 @@ namespace churchbot.voting
 
                 foreach (int opt in Options)
                 {
-                    tallies.Add(String.Concat("Tally for option ", votenum, " is ", tally.votes.Where(s => s.Choice == opt).Count()));
+                    tallies.Add(String.Concat("Tally for option ", opt, " is ", tally.votes.Where(s => s.Choice == opt).Count()));
                 }
                 tallies.Add("The following users voted:");
                 foreach (Vote vote in tally.votes)
@@ -296,8 +296,8 @@ namespace churchbot.voting
 
         private string GetGuildDir(string prefix)
         {
-
-            string path = "votes\\" + prefix.Replace("!", "") + "\\";
+            //string path = System.IO.Path.Combine("votes/", prefix.Replace("!", ""), "/");
+            string path = "votes/" + prefix.Replace("!", "") + "/";
 
 
             return path;

@@ -140,14 +140,14 @@ namespace churchbot {
                 } else if (fullcommand.ToString ().Contains ("addquestion")) {
                     churchbot.voting.voting vt = new churchbot.voting.voting ();
                     List<int> ids = new List<int> ();
-                    string path = String.Concat ("votes\\" + prefix.Replace ("!", ""), "\\");
+                    string path = String.Concat ("votes/" + prefix.Replace ("!", ""), "/");
                     //make sure the directory exists before we call any other methods
                     if (!(Directory.Exists (path))) Directory.CreateDirectory (path);
                     string[] files = System.IO.Directory.GetFiles (path);
                     int id = 0;
 
                     foreach (string file in files) {
-                        ids.Add (Convert.ToInt32 (file.Replace (path + "\\", "").Replace (".json", "")));
+                        ids.Add (Convert.ToInt32 (file.Replace (path + "/", "").Replace (".json", "")));
                     }
 
                     if (ids.Count == 0) {

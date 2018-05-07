@@ -182,7 +182,9 @@ namespace churchbot.voting
         {
             string path = GetGuildDir(prefix);
 
-            if (System.IO.File.Exists(path + vote.QuestionID.ToString() + ".json"))
+            string file = String.Concat(prefix, vote.QuestionID.ToString(), ".json");
+
+            if (System.IO.File.Exists(file))
             {
                 string filecontents = System.IO.File.ReadAllText(path + vote.QuestionID.ToString() + ".json");
 
@@ -215,7 +217,7 @@ namespace churchbot.voting
 
                         System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
 
-                        return (String.Concat(vote.user.UserName, " has successfully changed their vote."));
+                        return (String.Concat(vote.user.NickName, " has successfully changed their vote."));
                     }
                     else
                     {
@@ -225,7 +227,7 @@ namespace churchbot.voting
 
                         System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
 
-                        return (String.Concat(vote.user.UserName, " has successfully cast their vote."));
+                        return (String.Concat(vote.user.NickName, " has successfully cast their vote."));
                     }
                 }
             }
@@ -291,7 +293,21 @@ namespace churchbot.voting
         {
             string path = GetGuildDir(prefix);
 
-            return System.IO.Directory.GetFiles(path).Select(s => s.Split("/votes/")[1].Replace(".json", "")).ToList();
+
+            List<string> files = System.IO.Directory.GetFiles(path).ToList<string>();
+
+            if(files.Count == 0)
+            {
+                files.Add("There are currently no polls available. Use your add command to start one.");
+            }
+            else
+            {
+                files.Insert(0, "Currently active polls:");
+            }
+
+            //List<string> files = System.IO.Directory.GetFiles(path).Select(s => s.Split("/votes/")[1].Replace(".json", "")).ToList();
+
+            return files;
         }
 
         private string GetGuildDir(string prefix)

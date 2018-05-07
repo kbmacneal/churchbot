@@ -297,7 +297,7 @@ namespace churchbot.voting
         private string GetGuildDir(string prefix)
         {
 
-            path = "votes\\" + prefix.Replace("!", "") + "\\";
+            string path = "votes\\" + prefix.Replace("!", "") + "\\";
 
 
             return path;

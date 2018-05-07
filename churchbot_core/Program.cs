@@ -38,7 +38,7 @@ namespace churchbot {
             "vg!"
         };
 
-        private async SortedDictionary<string, string> GenPrefixMapping () {
+        private async Task<SortedDictionary<string, string>> GenPrefixMapping () {
             SortedDictionary<string, string> rtn = new SortedDictionary<string, string> ();
 
             rtn.Add ("cr!", "House Crux");
@@ -119,7 +119,7 @@ namespace churchbot {
 
                 SocketGuildUser user = (message.Author as SocketGuildUser);
 
-                string user_faction = (GenPrefixMapping ()) [prefix];
+                string user_faction = ((GenPrefixMapping ()).Result) [prefix];
 
                 bool isAuthorized = CheckAuthorization (user, msg_prefix);
 
@@ -140,7 +140,9 @@ namespace churchbot {
                 } else if (fullcommand.ToString ().Contains ("addquestion")) {
                     churchbot.voting.voting vt = new churchbot.voting.voting ();
                     List<int> ids = new List<int> ();
-                    string path = String.Concat ("votes\\" + prefix.Replace ("!", ""));
+                    string path = String.Concat ("votes\\" + prefix.Replace ("!", ""), "\\");
+                    //make sure the directory exists before we call any other methods
+                    if (!(Directory.Exists (path))) Directory.CreateDirectory (path);
                     string[] files = System.IO.Directory.GetFiles (path);
                     int id = 0;
 

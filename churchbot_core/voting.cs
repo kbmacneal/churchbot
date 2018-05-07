@@ -215,7 +215,7 @@ namespace churchbot.voting
                         }
                         string serialized = JsonConvert.SerializeObject(votes);
 
-                        System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
+                        System.IO.File.WriteAllText(file, serialized);
 
                         return (String.Concat(vote.user.NickName, " has successfully changed their vote."));
                     }
@@ -225,7 +225,7 @@ namespace churchbot.voting
 
                         string serialized = JsonConvert.SerializeObject(votes);
 
-                        System.IO.File.WriteAllText(path + vote.QuestionID.ToString() + ".json", serialized);
+                        System.IO.File.WriteAllText(file, serialized);
 
                         return (String.Concat(vote.user.NickName, " has successfully cast their vote."));
                     }

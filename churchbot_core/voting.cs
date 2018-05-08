@@ -2,6 +2,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -279,7 +280,11 @@ namespace churchbot.voting
             string path = string.Concat(prepath, votenum, ".json");
             if (!(System.IO.File.Exists(path)))
             {
-                System.IO.File.Create(path);
+                //System.IO.File.Create(path);
+                Bash(String.Concat("touch ", path));
+                Bash(String.Concat("chown ubuntu ", path));
+                Bash(String.Concat("chmod 777 ", path));
+
                 rtn.Add(string.Concat("Successfully created vote at ", path));
             }
             else
@@ -318,6 +323,27 @@ namespace churchbot.voting
 
 
             return path;
+        }
+
+        private static string Bash(string cmd)
+        {
+            var escapedArgs = cmd.Replace("\"", "\\\"");
+
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"{escapedArgs}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return result;
         }
     }
 }

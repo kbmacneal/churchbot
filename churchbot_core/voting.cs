@@ -182,10 +182,11 @@ namespace churchbot.voting
         {
             string path = GetGuildDir(prefix);
 
-            string file = String.Concat(prefix, vote.QuestionID.ToString(), ".json");
+            string file = String.Concat(path, vote.QuestionID.ToString(), ".json");
 
             if (System.IO.File.Exists(file))
             {
+
                 string filecontents = System.IO.File.ReadAllText(path + vote.QuestionID.ToString() + ".json");
 
                 Votes votes = JsonConvert.DeserializeObject<Votes>(filecontents);

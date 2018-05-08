@@ -10,6 +10,10 @@ If you want to have multiple sessions running side-by-side, you should name each
 
 tmux can do much more advanced things than handle a single window in a single session. For more information have a look in man tmux or the tmux GitHub page. In particular, here's an FAQ about the main differences between screen and tmux.
 
+On linux, you either have to futz around with permissions or you have to start in an elevated shell in order to get the voting to work, since the application needs read/write to the individual vote files in order to work properly. On windows you can set the recursive ACL to your user or the application user in order for it to work.
+
+sudo pwsh
+
 tmux list-sessions
 
 tmux kill-session -t targetSession to kill

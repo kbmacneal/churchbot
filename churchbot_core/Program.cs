@@ -131,8 +131,6 @@ namespace churchbot {
                 return;
             }
 
-            int argPosition = 0;
-
             if (prefixes.Any(message.Content.ToString().Substring(0, 3).Contains))
             {
                 string msg_prefix = message.Content.ToString().Substring(0, 3);

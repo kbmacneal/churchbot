@@ -21,3 +21,7 @@ tmux kill-session -t targetSession to kill
 chmod +x churchbot_core
 
 ./churchbot_core <app key>
+
+tmux cheatsheet
+
+https://gist.github.com/henrik/1967800

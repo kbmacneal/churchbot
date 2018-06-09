@@ -59,7 +59,8 @@ namespace churchbot {
             "rp!",
             "14!",
             "up!",
-            "vg!"
+            "vg!",
+            "!"
         };
 
         private async Task<SortedDictionary<string, string>> GenPrefixMapping()
@@ -85,6 +86,7 @@ namespace churchbot {
             rtn.Add("14!", " 14 Red Dogs Triad");
             rtn.Add("up!", "The Unified People's Collective");
             rtn.Add("vg!", "\"House\" Vagrant");
+            rtn.Add("!", "Default");
 
             return rtn;
         }
@@ -131,10 +133,17 @@ namespace churchbot {
                 return;
             }
 
-            if (prefixes.Any(message.Content.ToString().Substring(0, 3).Contains))
+            string msg_prefix = "";
+                if(message.Content.ToString().ToCharArray()[0] == '!'){
+                        msg_prefix = "!";
+                }
+                else{
+                    msg_prefix = message.Content.ToString().Substring(0, 3);
+                }
+
+            if (prefixes.Any(msg_prefix.Contains))
             {
-                string msg_prefix = message.Content.ToString().Substring(0, 3);
-                var context = new SocketCommandContext(_client, message);
+                // var context = new SocketCommandContext(_client, message);
 
                 string logmessage = String.Concat(message.Author, " sent command ", message.Content);
 
@@ -144,11 +153,9 @@ namespace churchbot {
 
                 string command = fullcommand.Replace(msg_prefix, "");
 
-                string prefix = fullcommand.ToString().Substring(0, 3);
-
                 SocketGuildUser user = (message.Author as SocketGuildUser);
 
-                string user_faction = ((GenPrefixMapping()).Result)[prefix];
+                string user_faction = ((GenPrefixMapping()).Result)[msg_prefix];
 
                 bool isAuthorized = CheckAuthorization(user, msg_prefix);
 
@@ -174,7 +181,7 @@ namespace churchbot {
                 {
                     churchbot.voting.voting vt = new churchbot.voting.voting();
                     List<int> ids = new List<int>();
-                    string path = String.Concat("votes/" + prefix.Replace("!", ""), "/");
+                    string path = String.Concat("votes/" + msg_prefix.Replace("!", ""), "/");
                     //make sure the directory exists before we call any other methods
                     if (!(Directory.Exists(path))) Directory.CreateDirectory(path);
 
@@ -212,6 +219,14 @@ namespace churchbot {
                             List<object> list = new List<object>();
                             list.Add(message.Author);
                             methodInfo.Invoke(cmd, list.ToArray());
+                            break;
+                        case "!":
+                            Modules.Default.commands cmd2 = new Modules.Default.commands();
+                            Type type2 = cmd2.GetType();
+                            MethodInfo methodInfo2 = type2.GetMethod(FirstCharToUpper(command)+"Async");
+                            List<object> list2 = new List<object>();
+                            list2.Add(message.Author);
+                            methodInfo2.Invoke(cmd2, list2.ToArray());
                             break;
                         default:
                             await SendPMAsync("There are no commands associated with this faction. Please consult an admin", message.Author);
@@ -291,6 +306,9 @@ namespace churchbot {
                     break;
                 case "vg!":
                     isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Vagrant");
+                    break;
+                case "!":
+                    isAuthorized = true;
                     break;
                 default:
 

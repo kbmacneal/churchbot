@@ -248,64 +248,64 @@ namespace churchbot {
             switch (prefix)
             {
                 case "cr!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Crux");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Crux");
                     break;
                 case "fr!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Fornax");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Fornax");
                     break;
                 case "vl!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Vela");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vela");
                     break;
                 case "aq!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Aquila");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Aquila");
                     break;
                 case "er!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Eridanus");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Eridanus");
                     break;
                 case "ly!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Lyra");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Lyra");
                     break;
                 case "py!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Pyxis");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Pyxis");
                     break;
                 case "rt!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Reticulum");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Reticulum");
                     break;
                 case "sr!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Serpens");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Serpens");
                     break;
                 case "tg!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Triangulum");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Triangulum");
                     break;
                 case "tr!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Trilliant Ring");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Trilliant Ring");
                     break;
                 case "ac!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("ACRE");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("ACRE");
                     break;
                 case "pr!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Prism Network");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Prism Network");
                     break;
                 case "dt!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Deathless");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Deathless");
                     break;
                 case "cb!":
-                    if ((user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The High Church of the Messiah-as-Emperor") || (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("church_member"))
+                    if (user.Roles.Select(s => s.Name).Contains("The High Church of the Messiah-as-Emperor") || user.Roles.Select(s => s.Name).Contains("church_member"))
                     {
                         isAuthorized = true;
                     }
                     break;
                 case "rp!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Church of Humanity, Repentant");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Church of Humanity, Repentant");
                     break;
                 case "14!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
                     break;
                 case "up!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
                     break;
                 case "vg!":
-                    isAuthorized = (user as IGuildUser).Guild.Roles.Select(s => s.Name).Contains("House Vagrant");
+                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vagrant");
                     break;
                 case "!":
                     isAuthorized = true;

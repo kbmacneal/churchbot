@@ -63,30 +63,30 @@ namespace churchbot {
             "!"
         };
 
-        private async Task<SortedDictionary<string, string>> GenPrefixMapping()
+        private async Task<SortedDictionary<string, string[]>> GenPrefixMapping()
         {
-            SortedDictionary<string, string> rtn = new SortedDictionary<string, string>();
+            SortedDictionary<string, string[]> rtn = new SortedDictionary<string, string[]>();
 
-            rtn.Add("cr!", "House Crux");
-            rtn.Add("fr!", "House Fornax");
-            rtn.Add("vl!", "House Vela");
-            rtn.Add("aq!", "House Aquila");
-            rtn.Add("er!", "House Eridanus");
-            rtn.Add("ly!", "House Lyra");
-            rtn.Add("py!", "House Pyxis");
-            rtn.Add("rt!", "House Reticulum");
-            rtn.Add("sr!", "House Serpens");
-            rtn.Add("tg!", "House Triangulum");
-            rtn.Add("tr!", "The Trilliant Ring");
-            rtn.Add("ac!", "ACRE");
-            rtn.Add("pr!", "The Prism Network");
-            rtn.Add("dt!", "The Deathless");
-            rtn.Add("cb!", "The High Church of the Messiah-as-Emperor");
-            rtn.Add("rp!", "The Church of Humanity, Repentant");
-            rtn.Add("14!", " 14 Red Dogs Triad");
-            rtn.Add("up!", "The Unified People's Collective");
-            rtn.Add("vg!", "\"House\" Vagrant");
-            rtn.Add("!", "Default");
+            rtn.Add("cr!", new string[] {"House Crux"});
+            rtn.Add("fr!", new string[] {"House Fornax"});
+            rtn.Add("vl!", new string[] {"House Vela"});
+            rtn.Add("aq!", new string[] {"House Aquila"});
+            rtn.Add("er!", new string[] {"House Eridanus"});
+            rtn.Add("ly!", new string[] {"House Lyra"});
+            rtn.Add("py!", new string[] {"House Pyxis"});
+            rtn.Add("rt!", new string[] {"House Reticulum"});
+            rtn.Add("sr!", new string[] {"House Serpens"});
+            rtn.Add("tg!", new string[] {"House Triangulum"});
+            rtn.Add("tr!", new string[] {"The Trilliant Ring"});
+            rtn.Add("ac!", new string[] {"ACRE"});
+            rtn.Add("pr!", new string[] {"The Prism Network"});
+            rtn.Add("dt!", new string[] {"The Deathless"});
+            rtn.Add("cb!", new string[] {"The High Church of the Messiah-as-Emperor","church_member"});
+            rtn.Add("rp!", new string[] {"The Church of Humanity, Repentant"});
+            rtn.Add("14!", new string[] {" 14 Red Dogs Triad"});
+            rtn.Add("up!", new string[] {"The Unified People's Collective"});
+            rtn.Add("vg!", new string[] {"\"House\" Vagrant"});
+            rtn.Add("!", new string[] {"Default"});
 
             return rtn;
         }
@@ -154,8 +154,6 @@ namespace churchbot {
                 string command = fullcommand.Replace(msg_prefix, "");
 
                 SocketGuildUser user = (message.Author as SocketGuildUser);
-
-                string user_faction = ((GenPrefixMapping()).Result)[msg_prefix];
 
                 bool isAuthorized = CheckAuthorization(user, msg_prefix);
 
@@ -245,75 +243,90 @@ namespace churchbot {
         {
             bool isAuthorized = false;
 
-            switch (prefix)
-            {
-                case "cr!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Crux");
-                    break;
-                case "fr!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Fornax");
-                    break;
-                case "vl!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vela");
-                    break;
-                case "aq!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Aquila");
-                    break;
-                case "er!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Eridanus");
-                    break;
-                case "ly!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Lyra");
-                    break;
-                case "py!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Pyxis");
-                    break;
-                case "rt!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Reticulum");
-                    break;
-                case "sr!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Serpens");
-                    break;
-                case "tg!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Triangulum");
-                    break;
-                case "tr!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Trilliant Ring");
-                    break;
-                case "ac!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("ACRE");
-                    break;
-                case "pr!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Prism Network");
-                    break;
-                case "dt!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Deathless");
-                    break;
-                case "cb!":
-                    if (user.Roles.Select(s => s.Name).Contains("The High Church of the Messiah-as-Emperor") || user.Roles.Select(s => s.Name).Contains("church_member"))
-                    {
-                        isAuthorized = true;
-                    }
-                    break;
-                case "rp!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Church of Humanity, Repentant");
-                    break;
-                case "14!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
-                    break;
-                case "up!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
-                    break;
-                case "vg!":
-                    isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vagrant");
-                    break;
-                case "!":
-                    isAuthorized = true;
-                    break;
-                default:
+            string[] user_faction = ((GenPrefixMapping()).Result)[prefix];
 
+            foreach(string faction in user_faction)
+            {
+                if(user.Roles.Select(s => s.Name).Contains(faction)){
+                    isAuthorized=true;
                     break;
+                }
             }
+
+            if(prefix == "!")
+            {
+                isAuthorized=true;
+            }
+
+            // switch (prefix)
+            // {
+            //     case "cr!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Crux");
+            //         break;
+            //     case "fr!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Fornax");
+            //         break;
+            //     case "vl!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vela");
+            //         break;
+            //     case "aq!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Aquila");
+            //         break;
+            //     case "er!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Eridanus");
+            //         break;
+            //     case "ly!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Lyra");
+            //         break;
+            //     case "py!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Pyxis");
+            //         break;
+            //     case "rt!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Reticulum");
+            //         break;
+            //     case "sr!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Serpens");
+            //         break;
+            //     case "tg!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Triangulum");
+            //         break;
+            //     case "tr!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("The Trilliant Ring");
+            //         break;
+            //     case "ac!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("ACRE");
+            //         break;
+            //     case "pr!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("The Prism Network");
+            //         break;
+            //     case "dt!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("The Deathless");
+            //         break;
+            //     case "cb!":
+            //         if (user.Roles.Select(s => s.Name).Contains("The High Church of the Messiah-as-Emperor") || user.Roles.Select(s => s.Name).Contains("church_member"))
+            //         {
+            //             isAuthorized = true;
+            //         }
+            //         break;
+            //     case "rp!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("The Church of Humanity, Repentant");
+            //         break;
+            //     case "14!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("14 Red Dogs Triad");
+            //         break;
+            //     case "up!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("The Unified People's Collective");
+            //         break;
+            //     case "vg!":
+            //         isAuthorized = user.Roles.Select(s => s.Name).Contains("House Vagrant");
+            //         break;
+            //     case "!":
+            //         isAuthorized = true;
+            //         break;
+            //     default:
+
+            //         break;
+            // }
 
             return isAuthorized;
         }

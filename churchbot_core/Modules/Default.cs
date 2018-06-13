@@ -98,30 +98,35 @@ namespace churchbot.Modules.Default {
         public async Task CommandsAsync (SocketUser user) {
 
             await user.SendMessageAsync (String.Concat ("```Here are the commands available to everyone" + System.Environment.NewLine +
-                "cb!ping : Make sure the bot is alive" + System.Environment.NewLine +
-                "cb!virtues : List all 10 of the Virtues" + System.Environment.NewLine +
-                "cb!virtue[1..10] : List a particular virtue" + System.Environment.NewLine +
-                "cb!commands : You're using it right now" + System.Environment.NewLine +
-                "cb!website : Link to the website" + System.Environment.NewLine +
-                "cb!twitter : Link to the official twitter" + System.Environment.NewLine +
-                "cb!pray : :keycap_ten: :pray:" + System.Environment.NewLine +
-                "cb!donate: pass the donation plate around" + System.Environment.NewLine +
-                "cb!listquestions lists the available votes" + System.Environment.NewLine +
-                "cb!factioncommands: instructions on how to add your own faction commands to the bot.```"));
+                "!ping : Make sure the bot is alive" + System.Environment.NewLine +
+                "!virtues : List all 10 of the Virtues" + System.Environment.NewLine +
+                "!virtue[1..10] : List a particular virtue" + System.Environment.NewLine +
+                "!commands : You're using it right now" + System.Environment.NewLine +
+                "!website : Link to the website" + System.Environment.NewLine +
+                "!twitter : Link to the official twitter" + System.Environment.NewLine +
+                "!pray : :keycap_ten: :pray:" + System.Environment.NewLine +
+                "!donate: pass the donation plate around" + System.Environment.NewLine +
+                "!listquestions lists the available votes" + System.Environment.NewLine +
+                "!contribute: if you want to contribute to the churchbot's development, a link to the git repo" + System.Environment.NewLine +
+                "!factioncommands: instructions on how to add your own faction commands to the bot.```"));
         }
 
         public async Task DonateAsync (SocketUser user) {
 
-            await user.SendMessageAsync ("_Passes the donation plate around_ http://highchurch.space/support");
+            await user.SendMessageAsync ("Passes the donation plate around_ http://highchurch.space/support");
         }
 
         public async Task FactioncommandsAsync (SocketUser user) {
-            await user.SendMessageAsync ("If your faction wishes to extend churchbot to have commands on this and other Church servers, contact a server admin and we can discuss");
+            await user.SendMessageAsync ("If your faction wishes to extend churchbot to have commands on this and other Church servers, contact a server admin and we can discuss.");
+        }
+
+        public async Task ContributeAsync (SocketUser user) {
+            await user.SendMessageAsync ("https://github.com/kbmacneal/churchbot");
         }
 
         //template
         // [Command ("")]
-        // public async Task NameAsync () {
+        // public async Task NameAsync (SocketUser user) {
         //     await user.SendMessageAsync ("Text");
         // }
 

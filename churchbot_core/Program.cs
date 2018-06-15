@@ -11,7 +11,8 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-namespace churchbot {
+namespace churchbot
+{
     internal class Program
     {
 
@@ -63,30 +64,30 @@ namespace churchbot {
             "!"
         };
 
-        private async Task<SortedDictionary<string, string[]>> GenPrefixMapping()
+        private async Task<Dictionary<string, string[]>> GenPrefixMapping()
         {
-            SortedDictionary<string, string[]> rtn = new SortedDictionary<string, string[]>();
+            Dictionary<string, string[]> rtn = new Dictionary<string, string[]>();
 
-            rtn.Add("cr!", new string[] {"House Crux"});
-            rtn.Add("fr!", new string[] {"House Fornax"});
-            rtn.Add("vl!", new string[] {"House Vela"});
-            rtn.Add("aq!", new string[] {"House Aquila"});
-            rtn.Add("er!", new string[] {"House Eridanus"});
-            rtn.Add("ly!", new string[] {"House Lyra"});
-            rtn.Add("py!", new string[] {"House Pyxis"});
-            rtn.Add("rt!", new string[] {"House Reticulum"});
-            rtn.Add("sr!", new string[] {"House Serpens"});
-            rtn.Add("tg!", new string[] {"House Triangulum"});
-            rtn.Add("tr!", new string[] {"The Trilliant Ring"});
-            rtn.Add("ac!", new string[] {"ACRE"});
-            rtn.Add("pr!", new string[] {"The Prism Network"});
-            rtn.Add("dt!", new string[] {"The Deathless"});
-            rtn.Add("cb!", new string[] {"The High Church of the Messiah-as-Emperor","church_member"});
-            rtn.Add("rp!", new string[] {"The Church of Humanity, Repentant"});
-            rtn.Add("14!", new string[] {" 14 Red Dogs Triad"});
-            rtn.Add("up!", new string[] {"The Unified People's Collective"});
-            rtn.Add("vg!", new string[] {"\"House\" Vagrant"});
-            rtn.Add("!", new string[] {"Default"});
+            rtn.Add("cr!", new string[] { "House Crux" });
+            rtn.Add("fr!", new string[] { "House Fornax" });
+            rtn.Add("vl!", new string[] { "House Vela" });
+            rtn.Add("aq!", new string[] { "House Aquila" });
+            rtn.Add("er!", new string[] { "House Eridanus" });
+            rtn.Add("ly!", new string[] { "House Lyra" });
+            rtn.Add("py!", new string[] { "House Pyxis" });
+            rtn.Add("rt!", new string[] { "House Reticulum" });
+            rtn.Add("sr!", new string[] { "House Serpens" });
+            rtn.Add("tg!", new string[] { "House Triangulum" });
+            rtn.Add("tr!", new string[] { "The Trilliant Ring" });
+            rtn.Add("ac!", new string[] { "ACRE" });
+            rtn.Add("pr!", new string[] { "The Prism Network" });
+            rtn.Add("dt!", new string[] { "The Deathless" });
+            rtn.Add("cb!", new string[] { "The High Church of the Messiah-as-Emperor", "church_member" });
+            rtn.Add("rp!", new string[] { "The Church of Humanity, Repentant" });
+            rtn.Add("14!", new string[] { " 14 Red Dogs Triad" });
+            rtn.Add("up!", new string[] { "The Unified People's Collective" });
+            rtn.Add("vg!", new string[] { "\"House\" Vagrant" });
+            rtn.Add("!", new string[] { "Default" });
 
             return rtn;
         }
@@ -128,46 +129,53 @@ namespace churchbot {
         {
             var message = arg as SocketUserMessage;
 
+            //prevent infinite loops where the bot is talking to itself or other bots
             if (message is null || message.Author.IsBot)
             {
                 return;
             }
-
+            
+            //determine the right prefix. if the prefix is blank, enforce the default prefix
             string msg_prefix = "";
-                if(message.Content.ToString().ToCharArray()[0] == '!'){
-                        msg_prefix = "!";
-                }
-                else{
-                    msg_prefix = message.Content.ToString().Substring(0, 3);
-                }
+            if (message.Content.ToString().ToCharArray()[0] == '!')
+            {
+                msg_prefix = "!";
+            }
+            else
+            {
+                msg_prefix = message.Content.ToString().Substring(0, 3);
+            }
 
+            //if the prefix is in the list of valid prefixes, continue
             if (prefixes.Any(msg_prefix.Contains))
             {
-                // var context = new SocketCommandContext(_client, message);
-
+                //log that we have a command sent
                 string logmessage = String.Concat(message.Author, " sent command ", message.Content);
 
                 await Log(new LogMessage(LogSeverity.Info, "VERBOSE", logmessage));
 
+                //useful variables to hold the message content and the command that was sent for later
                 string fullcommand = message.Content;
 
                 string command = fullcommand.Replace(msg_prefix, "");
 
                 SocketGuildUser user = (message.Author as SocketGuildUser);
-
+                
+                //check if the user is authorized to send the message that they did, using the prefix binding SortedDictionary above
                 bool isAuthorized = CheckAuthorization(user, msg_prefix);
 
                 if (!isAuthorized)
                 {
-
+                    //if not authorized, drop out before any message is processed 
                     await SendPMAsync("You are not authorized to send messages for this Faction.", message.Author);
 
                     return;
                 }
 
+                //figure out which module we're looking at
                 if (fullcommand.ToString().Contains("votefor") || fullcommand.ToString().Contains("votetally") || fullcommand.ToString().Contains("listquestions"))
                 {
-
+                    //process a vote request
                     voting.voting vt = new churchbot.voting.voting();
                     List<string> returns = await vt.ProcessVote(message, msg_prefix);
                     foreach (string rtn in returns)
@@ -177,6 +185,7 @@ namespace churchbot {
                 }
                 else if (fullcommand.ToString().Contains("addquestion"))
                 {
+                    //process a new poll
                     churchbot.voting.voting vt = new churchbot.voting.voting();
                     List<int> ids = new List<int>();
                     string path = String.Concat("votes/" + msg_prefix.Replace("!", ""), "/");
@@ -207,7 +216,7 @@ namespace churchbot {
                 }
                 else
                 {
-
+                    //here is where we handle commands that are not involved in voting, that just return messages.
                     switch (msg_prefix)
                     {
                         case "cb!":
@@ -221,7 +230,7 @@ namespace churchbot {
                         case "!":
                             Modules.Default.commands cmd2 = new Modules.Default.commands();
                             Type type2 = cmd2.GetType();
-                            MethodInfo methodInfo2 = type2.GetMethod(FirstCharToUpper(command)+"Async");
+                            MethodInfo methodInfo2 = type2.GetMethod(FirstCharToUpper(command) + "Async");
                             List<object> list2 = new List<object>();
                             list2.Add(message.Author);
                             methodInfo2.Invoke(cmd2, list2.ToArray());
@@ -236,6 +245,10 @@ namespace churchbot {
 
         public async Task SendPMAsync(string message, SocketUser user)
         {
+            string logmessage = String.Concat(user.Username, " was sent a messge");
+
+            await Log(new LogMessage(LogSeverity.Info, "VERBOSE", logmessage));
+
             await user.SendMessageAsync(message);
         }
 
@@ -245,22 +258,24 @@ namespace churchbot {
 
             string[] user_faction = ((GenPrefixMapping()).Result)[prefix];
 
-            foreach(string faction in user_faction)
+            foreach (string faction in user_faction)
             {
-                if(user.Roles.Select(s => s.Name).Contains(faction)){
-                    isAuthorized=true;
+                if (user.Roles.Select(s => s.Name).Contains(faction))
+                {
+                    isAuthorized = true;
                     break;
                 }
             }
 
-            if(prefix == "!")
+            if (prefix == "!")
             {
-                isAuthorized=true;
+                isAuthorized = true;
             }
 
             return isAuthorized;
         }
 
+    //helper method for manipulating strings to be in the right format for generic method section above
         public static string FirstCharToUpper(string s)
         {
             // Check for empty string.
@@ -273,7 +288,7 @@ namespace churchbot {
         }
 
 
-        
+
 
     }
 }
